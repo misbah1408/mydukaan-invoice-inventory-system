@@ -2,14 +2,15 @@ package com.mydukaan.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 
@@ -29,10 +30,10 @@ public class  JwtUtil {
 
     public String generateToken(String email) {
         return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 1 day
-                .signWith(key, SignatureAlgorithm.HS256)
+                .subject(email)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 1 day
+                .signWith(key)
                 .compact();
     }
 
@@ -49,10 +50,10 @@ public class  JwtUtil {
     }
 
     private Claims extractClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
+        return Jwts.parser()
+                .verifyWith((SecretKey) key)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

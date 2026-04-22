@@ -44,4 +44,9 @@ public class ProductController {
     public ResponseEntity<ApiResponse> deleteProduct(@PathVariable Long storeId, @PathVariable Long productId){
         return ResponseEntity.status(201).body(service.deleteProduct(storeId, productId));
     }
+
+    @GetMapping("/search/{storeId}/{keyword}")
+    public ResponseEntity searchProduct(@PathVariable Long storeId, @PathVariable String keyword){
+        return ResponseEntity.status(200).body(service.searchProduct(storeId, keyword));
+    }
 }

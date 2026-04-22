@@ -264,6 +264,36 @@ Authorization: Bearer <token>
 
 ---
 
+## Search Product by Name or Category
+
+**GET** `/api/search/{storeId}/{keyword}`
+
+### Headers
+
+```http
+Authorization: Bearer <token>
+```
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "message": "Product deleted successfully",
+  "data": [
+    {
+      "id": 1,
+      "name": "Product Name",
+      "price": 9500,
+      "stock": 80,
+      "category": "Category name",
+      "threshold": 10,
+      "storeId": 1
+    }
+  ]
+}
+```
+
 ## Status Codes
 
 * **200** → Success

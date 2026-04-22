@@ -47,14 +47,15 @@ User → Create Invoice → Validate Stock → Deduct Inventory → Calculate GS
 ```
 src/main/java/com/mydukaan
 │
-├── controller
-├── service
-├── repository
-├── entity
-├── dto
-├── security
 ├── config
+├── controller
+├── dto
+├── enums
 ├── exception
+├── model
+├── repository
+├── security
+├── service
 └── util
 ```
 
@@ -64,11 +65,12 @@ src/main/java/com/mydukaan
 
 Detailed API docs are available in the `/docs` folder:
 
-* Auth APIs → `docs/auth.md`
-* Product APIs → `docs/product.md`
-* Invoice APIs → `docs/invoice.md`
-* Payment APIs → `docs/payment.md`
-* Customer APIs → `docs/customer.md`
+* Auth APIs → `docs/auth.md` [Auth Docs](./docs/auth.md)
+* Product APIs → `docs/product.md` [Product Docs](./docs/product.md)
+* Invoice APIs → `docs/invoice.md` [Invoice Docs](./docs/invoice.md)
+* Store APIs → `docs/payment.md` [Store Docs](./docs/store.md)
+* Customer APIs → `docs/customer.md` [Customer Docs](./docs/customer.md)
+* Ledger APIs -> `docs/ledger.md` [Ledger Docs](./docs/ledger.md)
 
 Swagger UI:
 

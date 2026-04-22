@@ -93,6 +93,12 @@ public class ProductService {
         return new ApiResponse<>(true, "All products added successfully", null);
     }
 
+    public ApiResponse searchProduct(Long storeId, String keyword){
+        List<Product> products = productRepository.searchProductsByStoreIdAndNameOrCategory(storeId, keyword);
+        List<ProductResponse> responses = products.stream().map(this::mapToResponse).toList();
+        return new ApiResponse(true, "Success", responses);
+    }
+
     // =========================
     // 🔧 HELPER METHODS
     // =========================
