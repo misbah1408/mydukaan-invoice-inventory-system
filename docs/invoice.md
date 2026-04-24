@@ -128,7 +128,7 @@ Authorization: Bearer <token>
 
 ## Get All Invoices (by Store)
 
-**GET** `/api/invoice?storeId={storeId}`
+**GET** `/api/invoice{storeId}`
 
 ### Headers
 
@@ -145,9 +145,104 @@ Authorization: Bearer <token>
   "data": [
     {
       "id": 1,
-      "invoiceNumber": "INV-XXXX",
+      "invoiceNumber": "INV-2026-XXXXXX",
+      "storeId": 1,
+      "customerId": 2,
+      "customerName": "John",
+      "subTotal": 1000,
+      "gstAmount": 180,
       "totalAmount": 1180,
-      "status": "PAID"
+      "paidAmount": 500,
+      "dueAmount": 680,
+      "status": "PARTIAL",
+      "createdAt": "Date time",
+      "items": [
+        {
+          "id": 1,
+          "productId": 1,
+          "productName": "Product Name",
+          "quantity": 2,
+          "price": 500,
+          "total": 1000
+        }
+      ],
+      "payments": [
+        {
+          "id": 1,
+          "ledgerId": 1,
+          "ledgerName": "Cash",
+          "amount": 500,
+          "method": "CASH",
+          "status": "SUCCESS",
+          "transactionId": "TXN123"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      ".....": "...."
+    }
+  ]
+}
+```
+
+---
+
+## Get All Invoices (by Store)
+
+**GET** `/api/invoice/customer/{customerId}`
+
+### Headers
+
+```http
+Authorization: Bearer <token>
+```
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "message": "Successfully!!!",
+  "data": [
+    {
+      "id": 1,
+      "invoiceNumber": "INV-2026-XXXXXX",
+      "storeId": 1,
+      "customerId": 2,
+      "customerName": "John",
+      "subTotal": 1000,
+      "gstAmount": 180,
+      "totalAmount": 1180,
+      "paidAmount": 500,
+      "dueAmount": 680,
+      "status": "PARTIAL",
+      "createdAt": "Date time",
+      "items": [
+        {
+          "id": 1,
+          "productId": 1,
+          "productName": "Product Name",
+          "quantity": 2,
+          "price": 500,
+          "total": 1000
+        }
+      ],
+      "payments": [
+        {
+          "id": 1,
+          "ledgerId": 1,
+          "ledgerName": "Cash",
+          "amount": 500,
+          "method": "CASH",
+          "status": "SUCCESS",
+          "transactionId": "TXN123"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      ".....": "...."
     }
   ]
 }

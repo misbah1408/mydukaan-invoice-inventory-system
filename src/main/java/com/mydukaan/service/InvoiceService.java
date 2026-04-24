@@ -232,6 +232,12 @@ public class InvoiceService {
         return new PaymentResult(paidAmount);
     }
 
+    public ApiResponse<List<InvoiceResponse>> getInvoiceByCustomer(Long customerId) {
+        List<Invoice> invoices = invoiceRepo.findByCustomerId(customerId);
+        List<InvoiceResponse> responses = invoices.stream().map(this::mapToFullResponse).toList();
+        return new ApiResponse<>(true, "Success", responses);
+    }
+
     private record TaxResult(BigDecimal gst, BigDecimal total) {
     }
 

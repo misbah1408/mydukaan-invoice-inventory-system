@@ -121,6 +121,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>my-dukaan</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

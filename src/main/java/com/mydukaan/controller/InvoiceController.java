@@ -25,6 +25,11 @@ public class InvoiceController {
         return ResponseEntity.status(200).body(service.getInvoiceById(id));
     }
 
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<ApiResponse> getInvoiceByCustomer(@PathVariable Long customerId){
+        return ResponseEntity.status(200).body(service.getInvoiceByCustomer(customerId));
+    }
+
     @GetMapping()
     public ResponseEntity<ApiResponse> getAllInvoices(@RequestParam Long storeId){
         return ResponseEntity.status(200).body(service.getAllInvoices(storeId));
