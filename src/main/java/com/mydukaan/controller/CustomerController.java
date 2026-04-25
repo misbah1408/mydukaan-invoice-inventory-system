@@ -31,16 +31,16 @@ public class CustomerController {
         return ResponseEntity.status(200).body(customerService.getCustomersByStore(storeId));
     }
 
-    @PutMapping()
+    @PutMapping("/{customerId}")
     public ResponseEntity<ApiResponse> updateCustomer(
-            @RequestParam Long id,
+            @PathVariable Long customerId,
             @RequestBody CustomerRequest request) {
-        return ResponseEntity.status(200).body(customerService.updateCustomer(id, request));
+        return ResponseEntity.status(200).body(customerService.updateCustomer(customerId, request));
     }
 
-    @DeleteMapping()
-    public ResponseEntity<ApiResponse> deleteCustomer(@RequestParam Long id) {
-        customerService.deleteCustomer(id);
+    @DeleteMapping("/{customerId}")
+    public ResponseEntity<ApiResponse> deleteCustomer(@PathVariable Long customerId) {
+        customerService.deleteCustomer(customerId);
         return ResponseEntity.status(200).body(
                 new ApiResponse<>(true, "Success", "Customer deleted successfully")
         );

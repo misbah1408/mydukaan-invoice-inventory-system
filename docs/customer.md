@@ -57,12 +57,6 @@ Creates a new customer.
 
 Fetch a customer using ID.
 
-### Path Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| id   | long | Customer ID |
-
 ### Success Response (200)
 
 ```json
@@ -97,15 +91,9 @@ Fetch a customer using ID.
 
 ## 📋 Get Customers by Store
 
-**GET** `/api/customers/store/{storeId}`
+**GET** `/api/customers/store/storeId`
 
 Fetch all customers for a specific store.
-
-### Path Parameters
-
-| Name    | Type | Description |
-|---------|------|-------------|
-| storeId | long | Store ID    |
 
 ### Success Response (200)
 
@@ -134,15 +122,9 @@ Fetch all customers for a specific store.
 
 ## ✏️ Update Customer
 
-**PUT** `/api/customers?id={id}`
+**PUT** `/api/customers/customerId`
 
 Updates an existing customer.
-
-### Query Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| id   | long | Customer ID |
 
 ### Request Body
 
@@ -182,15 +164,10 @@ Updates an existing customer.
 
 ## ❌ Delete Customer
 
-**DELETE** `/api/customers?id={id}`
+**DELETE** `/api/customers/customerId`
 
 Deletes a customer.
 
-### Query Parameters
-
-| Name | Type | Description |
-|------|------|-------------|
-| id   | long | Customer ID |
 
 ### Success Response (200)
 
