@@ -31,14 +31,7 @@ Authorization: Bearer <token>
     "id": 1,
     "name": "Business Name",
     "createdAt": "Date time",
-    "user": {
-      "email": "email@test.com",
-      "id": 24,
-      "name": "Name",
-      "role": "ADMIN",
-      "createdAt": "Date time",
-      "updatedAt": "Date time"
-    }
+    "userName": "Owner name"
   }
 }
 ```
@@ -126,14 +119,7 @@ Authorization: Bearer <token>
     "id": 1,
     "name": "Business Name",
     "createdAt": "Date time",
-    "user": {
-      "email": "email@test.com",
-      "id": 24,
-      "name": "Name",
-      "role": "ADMIN",
-      "createdAt": "Date time",
-      "updatedAt": "Date time"
-    }
+    "username": "Owner Name"
   }
 }
 ```

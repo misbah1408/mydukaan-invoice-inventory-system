@@ -11,14 +11,14 @@ import java.time.LocalDateTime;
 @Builder
 public class StoreResponse {
     private Long id;
-    private UserResponse user;
+    private String userName;
     private String name;
     private LocalDateTime createdAt;
 
     @Override
     public String toString() {
         return "StoreResDto{" +
-                "user=" + user +
+                "userName=" + userName +
                 ", name='" + name + '\'' +
                 ", createdAt=" + createdAt +
                 '}';

@@ -67,31 +67,27 @@ public class StoreService {
         return new ApiResponse<>(true, "Stores fetched successfully!!!", res);
     }
 
+    public ApiResponse<StoreResponse> getStore(Long storeId) {
+        Store store = repo.findById(storeId).orElseThrow(() -> new ResourceNotFoundException("Store not found!!!"));
+        return new ApiResponse(true, "Store fetched successfully!!!", mapToStoreResDto(store));
+    }
+
     public ApiResponse<StoreResponse> deleteStore(Long id) {
         String email = getCurrentUserEmail();
         Long userId = userRepo.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found!!!")).getId();
-        Store store = repo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Store with " + id + " Not Found!!!"));
-        if (!Objects.equals(store.getOwner().getId(), userId)){
+        Store store = repo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Store with " + id + " Not Found!!!"));
+        if (!Objects.equals(store.getOwner().getId(), userId)) {
             throw new InvalidCredentialsException("Unauthorized User!!!");
         }
         repo.deleteById(id);
         return new ApiResponse<>(true, "Store Deleted Successfully!!!", mapToStoreResDto(store));
     }
 
-    private UserResponse mapToUserDto(User user) {
-        return UserResponse.builder()
-                .name(user.getName())
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
-                .build();
-    }
 
     private StoreResponse mapToStoreResDto(Store s) {
         return StoreResponse.builder()
                 .id(s.getId())
-                .user(mapToUserDto(s.getOwner()))
+                .userName(s.getOwner().getName())
                 .name(s.getName())
                 .createdAt(s.getCreatedAt())
                 .build();
@@ -110,5 +106,4 @@ public class StoreService {
         }
         return principal.toString();
     }
-
 }

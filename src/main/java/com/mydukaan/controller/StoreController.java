@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/store")
 public class StoreController {
     private final StoreService service;
 
@@ -20,9 +20,14 @@ public class StoreController {
         return ResponseEntity.status(200).body(service.create(store, null));
     }
 
-    @GetMapping("/stores")
+    @GetMapping()
     public ResponseEntity<ApiResponse> getStores(){
         return ResponseEntity.status(200).body(service.getStores());
+    }
+
+    @GetMapping("/{storeId}")
+    public ResponseEntity<ApiResponse> getStore(@PathVariable Long storeId){
+        return ResponseEntity.status(200).body(service.getStore(storeId));
     }
 
     @DeleteMapping("delete-store/{id}")
