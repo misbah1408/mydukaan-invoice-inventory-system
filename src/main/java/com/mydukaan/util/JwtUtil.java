@@ -1,8 +1,7 @@
 package com.mydukaan.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.mydukaan.exception.TokenExpired;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.io.Decoders;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +14,7 @@ import java.security.Key;
 import java.util.Date;
 
 @Component
-public class  JwtUtil {
+public class JwtUtil {
 
     @Value("${jwt.secret}")
     private String secret;
@@ -50,10 +49,16 @@ public class  JwtUtil {
     }
 
     private Claims extractClaims(String token) {
-        return Jwts.parser()
-                .verifyWith((SecretKey) key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        try {
+            return Jwts.parser()
+                    .verifyWith((SecretKey) key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            throw new TokenExpired("Token expired please login again!!!");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

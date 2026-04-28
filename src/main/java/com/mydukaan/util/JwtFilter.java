@@ -1,5 +1,6 @@
 package com.mydukaan.util;
 
+import com.mydukaan.exception.TokenExpired;
 import com.mydukaan.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -39,27 +40,34 @@ public class JwtFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
             String token = authHeader.substring(7);
-            String email = jwtUtil.extractEmail(token);
 
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            String email;
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-                if (jwtUtil.isTokenExpired(token)) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("Token expired. Please login again.");
-                    return;
+            try {
+                email = jwtUtil.extractEmail(token);
+                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                    if (jwtUtil.validateToken(token, email)) {
+
+                        UsernamePasswordAuthenticationToken auth =
+                                new UsernamePasswordAuthenticationToken(
+                                        userDetails, null, userDetails.getAuthorities());
+
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    }
                 }
-                if (jwtUtil.validateToken(token, email)) {
-
-                    UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails, null, userDetails.getAuthorities());
-
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                }
+                chain.doFilter(request, response);
+            } catch (TokenExpired expired) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("""
+                            {
+                              "success": false,
+                              "message": "Token expired please login again!!!"
+                            }
+                        """);
             }
         }
-
-        chain.doFilter(request, response);
     }
 }
