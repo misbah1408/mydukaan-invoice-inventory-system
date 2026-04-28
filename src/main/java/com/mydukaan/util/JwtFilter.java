@@ -35,15 +35,15 @@ public class JwtFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain chain)
             throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+        try {
+            String authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
-            String token = authHeader.substring(7);
+                String token = authHeader.substring(7);
 
-            String email;
+                String email;
 
-            try {
                 email = jwtUtil.extractEmail(token);
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
@@ -57,17 +57,17 @@ public class JwtFilter extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(auth);
                     }
                 }
-                chain.doFilter(request, response);
-            } catch (TokenExpired expired) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("""
-                            {
-                              "success": false,
-                              "message": "Token expired please login again!!!"
-                            }
-                        """);
             }
+            chain.doFilter(request, response);
+        } catch (TokenExpired expired) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("""
+                        {
+                          "success": false,
+                          "message": "Token expired please login again!!!"
+                        }
+                    """);
         }
     }
 }
