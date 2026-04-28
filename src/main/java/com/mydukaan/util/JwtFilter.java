@@ -34,7 +34,6 @@ public class JwtFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain chain)
             throws ServletException, IOException {
-
         try {
             String authHeader = request.getHeader("Authorization");
 
@@ -65,7 +64,7 @@ public class JwtFilter extends OncePerRequestFilter {
             response.getWriter().write("""
                         {
                           "success": false,
-                          "message": "Token expired please login again!!!"
+                          "error": "Token expired please login again!!!"
                         }
                     """);
         }

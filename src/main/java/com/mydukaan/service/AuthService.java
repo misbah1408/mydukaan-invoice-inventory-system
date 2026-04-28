@@ -9,8 +9,11 @@ import com.mydukaan.repository.UserRepository;
 import com.mydukaan.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +57,7 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(
                             request.getEmail(), request.getPassword())
             );
-        } catch (Exception e) {
+        } catch (BadCredentialsException | UsernameNotFoundException e) {
             throw new InvalidCredentialsException("Invalid email or password");
         }
 

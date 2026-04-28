@@ -1,5 +1,6 @@
 package com.mydukaan.security;
 
+import com.mydukaan.config.CustomAuthenticationEntryPoint;
 import com.mydukaan.util.JwtFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -26,10 +28,12 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
     private final JwtFilter jwtFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Autowired
-    public SecurityConfig(JwtFilter jwtFilter) {
+    public SecurityConfig(JwtFilter jwtFilter, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
         this.jwtFilter = jwtFilter;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
     @Bean
@@ -47,6 +51,9 @@ public class SecurityConfig {
         return httpSecurity
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
 //                        .requestMatchers("/api/admin/**")
 //                        .hasAuthority("ADMIN")
@@ -59,7 +66,7 @@ public class SecurityConfig {
                                 .authenticated()
                 )
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(authenticationEntryPoint())
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler())
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
@@ -81,17 +88,17 @@ public class SecurityConfig {
         return source;
     }
 
-    @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
-        return (request, response, ex) -> {
-            response.setContentType("application/json");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
-            response.getWriter().write(
-                    "{\"success\": false, \"message\": \"Unauthorized\"}"
-            );
-        };
-    }
+//    @Bean
+//    public AuthenticationEntryPoint authenticationEntryPoint() {
+//        return (request, response, ex) -> {
+//            response.setContentType("application/json");
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//
+//            response.getWriter().write(
+//                    "{\"success\": false, \"message\": \"Unauthorized\"}"
+//            );
+//        };
+//    }
 
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
