@@ -3,17 +3,15 @@ package com.mydukaan.service;
 import com.mydukaan.dto.common.ApiResponse;
 import com.mydukaan.dto.request.LedgerAdjRequest;
 import com.mydukaan.dto.request.LedgerRequest;
-import com.mydukaan.dto.response.LedgerEntriesResponse;
 import com.mydukaan.dto.response.LedgerResponse;
 import com.mydukaan.dto.response.PaymentResponse;
 import com.mydukaan.enums.TransactionType;
 import com.mydukaan.exception.ResourceNotFoundException;
 import com.mydukaan.model.Ledger;
-import com.mydukaan.model.LedgerEntry;
 import com.mydukaan.model.Payment;
 import com.mydukaan.model.Store;
-import com.mydukaan.repository.LedgerEntriesRepository;
 import com.mydukaan.repository.LedgerRepository;
+import com.mydukaan.repository.PaymentRepository;
 import com.mydukaan.repository.StoreRepository;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +23,13 @@ import java.util.Objects;
 public class LedgerService {
     private final LedgerRepository repo;
     private final StoreRepository storeRepo;
-    private final LedgerEntriesRepository ledgerEntriesRepo;
+    private final PaymentRepository paymentRepo;
 
-    LedgerService(LedgerRepository repo, StoreRepository storeRepo, LedgerEntriesRepository ledgerEntriesRepo) {
+    LedgerService(LedgerRepository repo, StoreRepository storeRepo,
+                  PaymentRepository paymentRepo) {
         this.repo = repo;
         this.storeRepo = storeRepo;
-        this.ledgerEntriesRepo = ledgerEntriesRepo;
+        this.paymentRepo = paymentRepo;
     }
 
     public ApiResponse<LedgerResponse> createLedger(LedgerRequest ledgerRequest) {
@@ -45,15 +44,16 @@ public class LedgerService {
         Ledger saved = repo.save(l);
         LedgerResponse res = mapToResponse(saved);
 
-        LedgerEntry entries = LedgerEntry.builder()
+        Payment payment = Payment.builder()
                 .name("Opening Balance")
-                .type(TransactionType.OPENING_BALANCE)
                 .ledger(l)
                 .amount(ledgerRequest.getBalance())
+                .status("SUCCESS")
+                .type(TransactionType.OPENING_BALANCE)
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        ledgerEntriesRepo.save(entries);
+        paymentRepo.save(payment);
 
         return new ApiResponse<>(true, "Ledger created Successfully!!!", res);
     }
@@ -82,37 +82,56 @@ public class LedgerService {
         }
 
         Ledger updatedLedger = repo.save(ledger);
-        LedgerEntry ledgerEntry = ledgerEntriesRepo.findByLedgerIdWithOpeningBalance(ledger.getId());
-        if (!Objects.equals(ledgerRequest.getBalance(), ledgerEntry.getAmount())) {
-            ledgerEntry.setAmount(ledger.getBalance());
+        Payment payment = paymentRepo.findOpeningBalanceByLedgerId(ledger.getId());
+        if (payment == null) {
+            payment = Payment.builder()
+                    .name(
+                            getLedgerName(TransactionType.OPENING_BALANCE))
+                    .type(TransactionType.OPENING_BALANCE)
+                    .ledger(ledger)
+                    .amount(ledgerRequest.getBalance())
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .build();
+        } else if (!Objects.equals(ledgerRequest.getBalance(), payment.getAmount())) {
+            payment.setAmount(ledger.getBalance());
         }
-        ledgerEntry.setCreatedAt(updatedLedger.getCreatedAt());
-        ledgerEntriesRepo.save(ledgerEntry);
+        payment.setCreatedAt(updatedLedger.getCreatedAt());
+        paymentRepo.save(payment);
         return new ApiResponse<>(true, "Ledger updated Successfully!!!", mapToResponse(updatedLedger));
     }
 
-    public ApiResponse<List<LedgerEntriesResponse>> getLedgerEntries(Long ledgerId) {
-        List<LedgerEntry> ledgerEntries = ledgerEntriesRepo.findByLedgerId(ledgerId);
-        List<LedgerEntriesResponse> responses = ledgerEntries.stream().map(this::mapToLedgerEntriesResponse).toList();
+    public ApiResponse<List<PaymentResponse>> getLedgerEntries(Long ledgerId) {
+        List<Payment> ledgerEntries = paymentRepo.findByLedgerId(ledgerId);
+        List<PaymentResponse> responses = ledgerEntries.stream().map(this::mapToPaymentResponse).toList();
         return new ApiResponse<>(true, "Fetched all entries", responses);
     }
 
     public ApiResponse<?> updateLedgerAdj(Long ledgerId, LedgerAdjRequest ledgerAdjRequest) {
         Ledger ledger = repo.findById(ledgerId).orElseThrow(() -> new ResourceNotFoundException("Ledger not found!!"));
-        if (ledgerAdjRequest.isAdded()) {
+        if (ledgerAdjRequest.getType() == TransactionType.ADJUSTMENT_INCREASE) {
             ledger.setBalance(ledger.getBalance().add(ledgerAdjRequest.getAmount()));
         } else {
             ledger.setBalance(ledger.getBalance().subtract(ledgerAdjRequest.getAmount()));
         }
-        LedgerEntry ledgerEntry = LedgerEntry.builder()
-                .name(getLedgerName(TransactionType.valueOf(ledgerAdjRequest.getType())))
-                .type(TransactionType.valueOf(ledgerAdjRequest.getType()))
+        Payment payment = Payment.builder()
+                .name(getLedgerName(ledgerAdjRequest.getType()))
+                .type(ledgerAdjRequest.getType())
                 .ledger(ledger)
                 .amount(ledgerAdjRequest.getAmount())
                 .createdAt(ledgerAdjRequest.getCreatedAt())
                 .build();
-        ledgerEntriesRepo.save(ledgerEntry);
+        paymentRepo.save(payment);
         return new ApiResponse<>(true, "Updated Successfully!!!", null);
+    }
+
+    public ApiResponse<?> accountToAccount(List<LedgerAdjRequest> ledgerAdjRequests) {
+        if (ledgerAdjRequests.size() != 2) {
+            throw new RuntimeException("Something went wrong!!");
+        }
+        updateLedgerAdj(ledgerAdjRequests.getFirst().getLedgerId(), ledgerAdjRequests.getFirst());
+        updateLedgerAdj(ledgerAdjRequests.get(1).getLedgerId(), ledgerAdjRequests.get(1));
+        return new ApiResponse<>(true, "Transferred Successfully!!!", null);
     }
 
     private String getLedgerName(TransactionType type) {
@@ -151,28 +170,17 @@ public class LedgerService {
     private PaymentResponse mapToPaymentResponse(Payment payment) {
         return PaymentResponse.builder()
                 .id(payment.getId())
-                .invoiceId(payment.getInvoice().getId())
-                .invoiceNumber(payment.getInvoice().getInvoiceNumber())
+                .name(payment.getName())
+                .invoiceId(payment.getInvoice() != null ? payment.getInvoice().getId() : null)
+                .invoiceNumber(payment.getInvoice() != null ? payment.getInvoice().getInvoiceNumber() : null)
                 .ledgerId(payment.getLedger().getId())
                 .ledgerName(payment.getLedger().getDisplayName())
                 .amount(payment.getAmount())
                 .method(payment.getMethod())
                 .status(payment.getStatus())
+                .type(getLedgerName(payment.getType()))
                 .transactionId(payment.getTransactionId())
                 .createdAt(payment.getCreatedAt())
-                .build();
-    }
-
-    private LedgerEntriesResponse mapToLedgerEntriesResponse(LedgerEntry e) {
-        return LedgerEntriesResponse.builder()
-                .id(e.getId())
-                .name(e.getName())
-                .type(e.getType().name())
-                .paymentId(e.getPayment() == null ? null : e.getPayment().getId())
-                .ledgerId(e.getLedger().getId())
-                .amount(e.getAmount())
-                .createdAt(e.getCreatedAt())
-                .updatedAt(e.getCreatedAt())
                 .build();
     }
 }

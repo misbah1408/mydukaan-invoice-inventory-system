@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class PaymentResponse {
 
     private Long id;
-
+    private String name;
     private Long invoiceId;
     private String invoiceNumber;
 
@@ -22,7 +22,9 @@ public class PaymentResponse {
     private String method;
     private String status;
 
+    private String type;
     private String transactionId;
 
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

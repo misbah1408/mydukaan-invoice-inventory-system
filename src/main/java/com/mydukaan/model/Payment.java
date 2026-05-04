@@ -1,5 +1,6 @@
 package com.mydukaan.model;
 
+import com.mydukaan.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +20,7 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String name;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "invoice_id")
@@ -35,10 +37,17 @@ public class Payment {
 
     private String status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private TransactionType type;
+
     @Column(name = "transaction_id")
     private String transactionId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "updated_ at")
+    private LocalDateTime updatedAt;
 
 }
